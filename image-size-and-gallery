@@ -1,0 +1,34 @@
+// Custom thumb image size for product box
+add_filter('woocommerce_product_get_image', 'custom_single_product_image_size', 10, 2);
+function custom_single_product_image_size($image, $product) {
+    if ( is_product() ) {
+        return wp_get_attachment_image($product->get_image_id(), 'medium_large');
+    }
+    return $image; // For shop/archive pages, return the default image
+}
+
+/**
+ * Disable cropping of product gallery thumbnails so they retain their aspect ratio.
+ */
+add_filter( 'woocommerce_get_image_size_gallery_thumbnail', 'uncrop_wc_gallery_thumb' );
+function uncrop_wc_gallery_thumb( $size ) {
+    return array(
+        'width'  => isset( $size['width'] ) ? (int) $size['width'] : 0,
+        'height' => 0,     // 0 = unlimited height, no forced crop
+        'crop'   => false, // false = no crop
+    );
+}
+
+// Replace WooCommerce gallery nav text with custom arrows
+add_filter( 'woocommerce_single_product_carousel_options', function( $options ) {
+	$options['directionNav'] = true; // Ensure arrows are enabled
+	$options['prevText'] = '<i class="fa fa-chevron-left"></i>';  // Font Awesome left arrow
+	$options['nextText'] = '<i class="fa fa-chevron-right"></i>'; // Font Awesome right arrow
+	//$options['controlNav']   = true; // Dots navigation (optional)
+	return $options;
+});
+
+// Disable zoom on product images
+add_action( 'wp', function() {
+	remove_theme_support( 'wc-product-gallery-zoom' );
+});
